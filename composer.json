@@ -1,0 +1,36 @@
+{
+    "name": "nonetallt/laravel-autoschema",
+    "description": "Generate markdown file describing all your laravel application models and their attributes.",
+    "keywords": ["php", "schema", "documentation", "models", "laravel"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jyri Mikkola",
+            "email": "jyri.mikkola@pp.inet.fi"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.0",
+        "illuminate/console": "5.5.x",
+        "maddhatter/markdown-table": "^1.0",
+        "jan-swiecki/simple-annotations": "^0.3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nonetallt\\LaravelAutoschema\\": "src/"
+        },
+        "files": [
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nonetallt\\LaravelAutoschema\\AutoschemaServiceProvider"
+            ],
+            "aliases": {
+            }
+        }
+    }
+}
