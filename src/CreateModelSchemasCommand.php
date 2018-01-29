@@ -83,7 +83,7 @@ class CreateModelSchemasCommand extends Command
     private function getClassAttributes(string $className)
     {
         /* Check if class exists */
-        if(! class_exists($className)) throw new \Exception("Could no find class '$className'");
+        if(! class_exists($className)) throw new \Exception("Could not find class '$className'");
 
         /* Check that class is an eloquent model */ 
         if(! is_subclass_of($className,'Illuminate\Database\Eloquent\Model')) return false;
