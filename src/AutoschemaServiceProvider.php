@@ -10,7 +10,7 @@ class AutoschemaServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/config/joptimize.php' => config_path('joptimize.php'),
+            __DIR__.'/config/autoschema.php' => config_path('autoschema.php'),
         ]);
     }
 
