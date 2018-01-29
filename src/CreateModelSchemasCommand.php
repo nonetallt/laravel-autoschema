@@ -43,7 +43,7 @@ class CreateModelSchemasCommand extends Command
         foreach($classes as $class)
         {
             /* Resolve full name of the class */
-            $namespace = config('autoschema.model_namespace', 'App');
+            $namespace = config('autoschema.model_namespace');
             $className = "$namespace\\$class";
 
             /* Try get all attributes for the class */
@@ -72,7 +72,7 @@ class CreateModelSchemasCommand extends Command
         }
 
         /* Write the output */
-        $filepath = config('autoschema.output_path', base_path('schema.md'));
+        $filepath = config('autoschema.output_path');
         $handle = fopen($filepath, 'w');
         fwrite($handle, $output);
         fclose($handle);

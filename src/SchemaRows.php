@@ -84,12 +84,12 @@ class SchemaRows
 
     private function yesString()
     {
-        return config('autoschema.yes_string', 'yes');
+        return config('autoschema.yes_string');
     }
 
     private function noString()
     {
-        return config('autoschema.no_string', 'no');
+        return config('autoschema.no_string');
     }
 
     private function isFillable(string $attribute)

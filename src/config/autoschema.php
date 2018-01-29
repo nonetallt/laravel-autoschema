@@ -11,7 +11,7 @@ return [
     /* Which namespace to use when looking for model properties, should match
      * with psr-4 loading in laravel applications 
      * */
-    'model_namespace' => 'App\\',
+    'model_namespace' => 'App',
 
     /* What to output in the table when property is true, might need to be
      * reconfigured if special characters show incorrectly for the dev machine 
