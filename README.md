@@ -58,3 +58,4 @@ php artisan vendor:publish --provider="Nonetallt\Autoschema\AutoschemaServicePro
 * model_namespace
 * yes_string
 * no_string
+* print_table_name

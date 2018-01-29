@@ -21,15 +21,18 @@ class SchemaRows
         foreach($this->attributes as $type => $category) {
 
             /* Get the callback to resolve the category*/ 
-            $cb = $this->cb($category);
+            $cb = $this->cb($type);
 
-            foreach($category as $attributes) {
+            foreach($category as $attribute) {
                 
                 /* Get properties for this attribute */
                 $result = $cb($attribute);
 
                 /* Turn boolean results into strings */
-                $rows[] = $this->resolveBool($row);
+                $result = $this->resolveBool($result);
+
+                /* Append attribute name as first value */
+                $rows[] = array_merge([$attribute], $result);
             }
         }
         return $rows;
@@ -112,7 +115,7 @@ class SchemaRows
     {
         $prop = (new \ReflectionClass($this->class))->getProperty('appends');
         $prop->setAccessible(true);
-        $appended = $prop->getValue(($this->class));
+        $appended = $prop->getValue(($this->model));
         return in_array($attribute, $appended);
     }
 }

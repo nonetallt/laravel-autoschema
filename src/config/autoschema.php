@@ -19,5 +19,8 @@ return [
     'yes_string' => '&#10003;',
 
     /* What to output in the table when property is false */
-    'no_string ' => 'no'
+    'no_string ' => 'no',
+
+    /* Print table name after model name */
+    'print_table_name' => true
 ];

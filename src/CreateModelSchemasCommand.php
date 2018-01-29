@@ -38,24 +38,33 @@ class CreateModelSchemasCommand extends Command
     public function handle()
     {
         $output = '';
-
         $classes = $this->getClasses(config('autoschema.model_directory', app_path()));
+
         foreach($classes as $class)
         {
-            $attributes = $this->getClassAttributes($class);
-            if(! is_array($attributes)) continue;
-
-            /* Output class name */
-            /* TODO table name */
-            $output .= '## ' . $class . PHP_EOL;    
-
-            $builder = new \MaddHatter\MarkdownTable\Builder();
-            $builder->headers(['Attribute', 'Computed', 'Fillable', 'Relation', 'Serialized']);
-
             /* Resolve full name of the class */
             $namespace = config('autoschema.model_namespace', 'App');
             $className = "$namespace\\$class";
 
+            /* Try get all attributes for the class */
+            $attributes = $this->getClassAttributes($className);
+
+            /* Skip unresolvable classes */
+            if(! is_array($attributes)) continue;
+
+            /* Output class name */
+            $output .= '## ' . $class;    
+            
+            /* Append table name */
+            if(config('autoschema.print_table_name')) {
+                $output .= ' (' . (new $className())->getTable() . ')';
+            }
+
+            /* Write line change after heading */
+            $output .= PHP_EOL;
+
+            $builder = new \MaddHatter\MarkdownTable\Builder();
+            $builder->headers(['Attribute', 'Computed', 'Fillable', 'Relation', 'Serialized']);
             $builder->rows((new SchemaRows($className, $attributes))->toArray());
 
             $output .= $builder->render();
@@ -63,33 +72,30 @@ class CreateModelSchemasCommand extends Command
         }
 
         /* Write the output */
-        $filepath = config('autoschema.output_path', base_path('schema.md)'));
+        $filepath = config('autoschema.output_path', base_path('schema.md'));
         $handle = fopen($filepath, 'w');
         fwrite($handle, $output);
         fclose($handle);
 
-        $this->info("Schema generated at '$filepath'.");
+        $this->info("Schema created at '$filepath'");
     }
 
     private function getClassAttributes(string $className)
     {
-        $namespace = 'App\\';
-        $fullName = $namespace.$className;
-
         /* Check if class exists */
-        if(! class_exists($fullName)) throw new \Exception("Could no find class '$className'");
+        if(! class_exists($className)) throw new \Exception("Could no find class '$className'");
 
         /* Check that class is an eloquent model */ 
-        if(! is_subclass_of($fullName,'Illuminate\Database\Eloquent\Model')) return false;
+        if(! is_subclass_of($className,'Illuminate\Database\Eloquent\Model')) return false;
 
         /* Dynamically generate a new class instance */
-        $model = new $fullName();
+        $model = new $className();
 
         /* Make sure there are no duplicates if database attributes have defined accessor */
         return  [
             'columns'   => $this->getColumns($model),
-            'accessors' => $this->getAccessorAttributes($fullName),
-            'relations' => $this->getRelations($fullName)
+            'accessors' => $this->getAccessorAttributes($className),
+            'relations' => $this->getRelations($className)
             /* $this->getTimestamps($model) */
         ];
     }
@@ -111,29 +117,29 @@ class CreateModelSchemasCommand extends Command
         return [];
     }
 
-    private function getRelations(string $fullName)
+    private function getRelations(string $className)
     {
         /* Find all methods for the class */
-        $methods = (new \ReflectionClass($fullName))->getMethods();
+        $methods = (new \ReflectionClass($className))->getMethods();
 
         /* Get all methods that are defined by the class and not parents */
         /* Check that the method has 'relation' docblock annotation */
-        $methods = collect($methods)->filter(function($method) use ($fullName){
-            return $method->class === $fullName && $this->methodIsRelation($fullName, $method->name);
+        $methods = collect($methods)->filter(function($method) use ($className){
+            return $method->class === $className && $this->methodIsRelation($className, $method->name);
         })
-        ->map(function($method) use ($fullName){
+        ->map(function($method) use ($className){
             /* Apply snake case if neccesary */
-            return $this->applySnakeCase($fullName, $method->name);
+            return $this->applySnakeCase($className, $method->name);
         })
         ->toArray();
 
         return $methods;
     }
 
-    private function methodIsRelation(string $fullName, $method)
+    private function methodIsRelation(string $className, $method)
     {
         try {
-            $reader = new \DocBlockReader\Reader($fullName, $method, 'method');
+            $reader = new \DocBlockReader\Reader($className, $method, 'method');
             $relation = $reader->getParameter('relation');
             return ! is_null($relation);
         }
@@ -142,20 +148,20 @@ class CreateModelSchemasCommand extends Command
         return false;
     }
 
-    private function applySnakeCase(string $fullName, string $subject)
+    private function applySnakeCase(string $className, string $subject)
     {
         /* Change to snake case if the option is used for this class */
-        if($fullName::$snakeAttributes) $subject = snake_case($subject);
+        if($className::$snakeAttributes) $subject = snake_case($subject);
 
         return $subject;
     }
 
-    private function getAccessorAttributes(string $fullName)
+    private function getAccessorAttributes(string $className)
     {
         $attributes = [];
 
         /* Find methods matching getXAttribute */
-        foreach(get_class_methods($fullName) as $method)
+        foreach(get_class_methods($className) as $method)
         {
             /* Make sure that the whole signature is matched */
             if(preg_match('|^get.+?Attribute$|', $method) === 1) {
@@ -166,7 +172,7 @@ class CreateModelSchemasCommand extends Command
                 /* Lowercase first letter */
                 $name = lcfirst($name);
 
-                $name = $this->applySnakeCase($fullName, $name);
+                $name = $this->applySnakeCase($className, $name);
 
                 $attributes[] = $name;
             }
