@@ -4,7 +4,7 @@ namespace Nonetallt\LaravelAutoschema;
 
 use Illuminate\Support\ServiceProvider;
 
-class LaravelAutoschemaServiceProvider extends ServiceProvider
+class AutoschemaServiceProvider extends ServiceProvider
 {
 
     public function boot()

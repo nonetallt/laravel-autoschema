@@ -48,7 +48,7 @@ public function addresses()
 #### Publishing the configuration file
 
 ```
-php artisan vendor:publish --provider="Nonetallt\Autoschema\AutoschemaServiceProvider"
+php artisan vendor:publish --provider="Nonetallt\LaravelAutoschema\AutoschemaServiceProvider"
 ```
 
 #### Available options
